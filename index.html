@@ -1,2 +1,249 @@
-<h1>Baggage</h1>
+<!DOCTYPE HTML>
+<!--
+	Miniport 2.5 by HTML5 UP
+	html5up.net | @n33co
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>baggage.io - A gem/bundler/rake/rails-like system for Bash</title>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+		<meta name="description" content="" />
+		<meta name="keywords" content="" />
+		<link href="http://fonts.googleapis.com/css?family=Open+Sans:300,600,700" rel="stylesheet" />
+		<script src="js/jquery.min.js"></script>
+		<script src="js/config.js"></script>
+		<script src="js/skel.min.js"></script>
+		<noscript>
+			<link rel="stylesheet" href="css/skel-noscript.css" />
+			<link rel="stylesheet" href="css/style.css" />
+			<link rel="stylesheet" href="css/style-desktop.css" />
+		</noscript>
+                <script type="text/javascript" src="js/shCore.js"></script>
+                <script type="text/javascript" src="js/shBrushBash.js"></script>
+                <link type="text/css" rel="stylesheet" href="css/shCoreDefault.css"/>
+                <script type="text/javascript">SyntaxHighlighter.all();</script>
+		<!--[if lte IE 9]><link rel="stylesheet" href="css/ie9.css" /><![endif]-->
+		<!--[if lte IE 8]><script src="js/html5shiv.js"></script><link rel="stylesheet" href="css/ie8.css" /><![endif]-->
+		<!--[if lte IE 7]><link rel="stylesheet" href="css/ie7.css" /><![endif]-->
+	</head>
+	<body>
 
+		<!-- Nav -->
+			<nav id="nav">
+				<ul class="container">
+					<li><a href="#top">Top</a></li>
+					<li><a href="#get">Get</a></li>
+					<li><a href="#create">Create</a></li>
+					<li><a href="#more">More</a></li>
+				</ul>
+			</nav>
+
+		<!-- Home -->
+			<div class="wrapper wrapper-style1 wrapper-first">
+				<article class="container" id="top">
+					<div class="row">
+						<div class="4u">
+							<span class="image image-full"><img src="images/Case-icon.png" alt="baggage icon" /></span>
+						</div>
+						<div class="8u">
+							<header>
+								<h1>Use Bash? Use <strong>baggage</strong></h1>
+							</header>
+							<p>A gem/bundler/rake/rails-like system for Bash. Because <strong>Bash</strong> shouldn't have to be ugly.</p>
+							<a href="#get" class="button button-big">See how it works</a>
+						</div>
+					</div>
+				</article>
+			</div>
+
+		<!-- Get -->
+			<div class="wrapper wrapper-style2">
+				<article id="get">
+					<header>
+						<h2>Getting it</h2>
+                                                <span>It's really easy to install</span>
+					</header>
+					<div class="container">
+						<div class="row">
+					          <div class="2u">.</div>
+					          <div class="8u">
+						    <article class="box box-style2">
+                                                        <pre class="brush: bash;">
+curl http://get.baggagio.io | bash
+                                                     </pre>
+                                                    </article>
+						  </div>
+					</div>
+					<footer>
+						<a href="#create" class="button button-big">Creating a project</a>
+					</footer>
+				</article>
+			</div>
+
+		<!-- Create -->
+			<div class="wrapper wrapper-style3">
+				<article id="create">
+					<header>
+						<h2>Creating a project</h2>
+						<span>It's super easy to get started with Baggage</span>
+					</header>
+					<div class="container">
+						<div class="row">
+					                <div class="2u">.</div>
+							<div class="8u">
+                                                          <h3>baggage new</h3>
+                                                          <p>Initialise a new project</p>
+						          <article class="box box-style2">
+                                                        <pre class="brush: bash; 8u">
+$ baggage new calc_total
+$ cd calc_total
+calc_total$ tree
+.
+├── Baggage
+├── bags
+├── bin
+│   └── calc_total
+├── ext
+├── lib
+│   └── example.bash
+├── out
+└── test
+    └── example.bats
+
+6 directories, 4 files
+                                                            </pre>
+                                                          </article>
+                                                          <h3>baggage install</h3>
+                                                          <p>Install external libraries defined in the Baggage file</p>
+						          <article class="box box-style2">
+                                                        <pre class="brush: bash; 8u">
+calc_total$ baggage install
+Installing bats
+Cloning from https://github.com/sstephenson/bats.git
+Cloning into 'ext/bats'...
+remote: Counting objects: 387, done.
+remote: Compressing objects: 100% (236/236), done.
+remote: Total 387 (delta 176), reused 335 (delta 134)
+Receiving objects: 100% (387/387), 56.06 KiB | 0 bytes/s, done.
+Resolving deltas: 100% (176/176), done.
+Checking connectivity... done
+                                                            </pre>
+                                                          </article>
+                                                          <h3>baggage test</h3>
+                                                          <p>Run <a href="https://github.com/sstephenson/bats">bats</a> tests</p>
+						          <article class="box box-style2">
+                                                        <pre class="brush: bash; 8u">
+calc_total$ baggage test
+ ✓ add two numbers
+ 
+1 test, 0 failures
+                                                            </pre>
+                                                          </article>
+                                                          <h3>baggage run</h3>
+                                                          <p>Run the application</p>
+						          <article class="box box-style2">
+                                                        <pre class="brush: bash; 8u">
+calc_total$ baggage run 1 2 3 4
+Total: 10
+                                                            </pre>
+                                                          </article>
+                                                          <h3>baggage build</h3>
+                                                          <p>Build a standalone application and bag</p>
+						          <article class="box box-style2">
+                                                        <pre class="brush: bash; 8u">
+calc_total$ baggage build /usr/local/bin
+calc_total$ cd ~
+$ calc_total 1 2 3 4
+Total: 10
+                                                            </pre>
+                                                          </article>
+							</div>
+						</div>
+					</div>
+					<footer>
+						<a href="#more" class="button button-big">Find out more</a>
+					</footer>
+				</article>
+			</div>
+
+		<!-- More -->
+			<div class="wrapper wrapper-style4">
+				<article id="more" class="container small">
+					<header>
+						<h2>Want to know more?</h2>
+                                                <span>Baggage can be used to create standalone applications as well as libraries that you can share (better known as bags)</span>
+					</header>
+					<div>
+						<div class="row">
+						  <div class="12u">
+                                                    <h3>Documentation</h3>
+                                                    <p>Documentation is available on <a href="">GitHub</a>.</p>
+                                                    <h3>Found a bug?</h3>
+                                                    <p>Raise an issue <a href="">here</a>.</p>
+					          </div>
+						</div>
+					<div class="row">
+						<div class="12u">
+                                                <hr/>
+							<h3>Feedback</h3>
+ <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'baggageio'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    
+                                                </div>
+                                        </div>
+						<div class="row">
+							<div class="12u">
+								<hr />
+								<h3>Spread the love ...</h3>
+								<ul class="social">
+									<li class="twitter"><a href="#" class="fa fa-twitter"><span>Twitter</span></a></li>
+									<li class="facebook"><a href="#" class="fa fa-facebook"><span>Facebook</span></a></li>
+									<li class="dribbble"><a href="#" class="fa fa-dribbble"><span>Dribbble</span></a></li>
+									<li class="linkedin"><a href="#" class="fa fa-linkedin"><span>LinkedIn</span></a></li>
+									<li class="tumblr"><a href="#" class="fa fa-tumblr"><span>Tumblr</span></a></li>
+									<li class="googleplus"><a href="#" class="fa fa-google-plus"><span>Google+</span></a></li>
+									<li class="github"><a href="#" class="fa fa-github"><span>Github</span></a></li>
+									<!--
+									<li class="rss"><a href="#" class="fa fa-rss"><span>RSS</span></a></li>
+									<li class="instagram"><a href="#" class="fa fa-instagram"><span>Instagram</span></a></li>
+									<li class="foursquare"><a href="#" class="fa fa-foursquare"><span>Foursquare</span></a></li>
+									<li class="skype"><a href="#" class="fa fa-skype"><span>Skype</span></a></li>
+									<li class="soundcloud"><a href="#" class="fa fa-soundcloud"><span>Soundcloud</span></a></li>
+									<li class="youtube"><a href="#" class="fa fa-youtube"><span>YouTube</span></a></li>
+									<li class="blogger"><a href="#" class="fa fa-blogger"><span>Blogger</span></a></li>
+									<li class="flickr"><a href="#" class="fa fa-flickr"><span>Flickr</span></a></li>
+									<li class="vimeo"><a href="#" class="fa fa-vimeo"><span>Vimeo</span></a></li>
+									-->
+								</ul>
+								<hr />
+							</div>
+						</div>
+					</div>
+					<footer>
+						<ul id="copyright">
+							<li>&copy; 2013 <a href="">zeroXten</a></li>
+							<li><a href="http://fotogrph.com">fotogrph</a></li>
+							<li><a href="http://html5up.net/">HTML5 UP</a></li>
+                                                        <li><a href="http://www.iconarchive.com/show/happy-holidays-icons-by-robsonbillponte/Case-icon.html">robsonbillponte</a></li>
+                                                        <li><a href="http://alexgorbatchev.com/SyntaxHighlighter/manual/installation.html">SyntaxHighlighter</a></li>
+						</ul>
+					</footer>
+				</article>
+			</div>
+
+
+	</body>
+</html>
