@@ -1,0 +1,5 @@
+name        "baggage"
+version     "0.1.0"
+description "Gem-like plugins for bash. Because 'bash' shouldn't mean ugly."
+
+ext bats https://github.com/sstephenson/bats.git

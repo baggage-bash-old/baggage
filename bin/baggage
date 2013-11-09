@@ -1,0 +1,18 @@
+#!/bin/bash
+set -e
+
+# Need to bootstrap the bootstrap
+if [ -z "$BAGGAGE_APP_BUILT" ]; then
+  source lib/bootstrap.bash
+else
+  bootstrap
+fi
+
+load app
+load config
+built? || source "./$BAGGAGE_CONFIG_FILE"
+
+if [ "$(app_name)" = "baggage" ]; then
+  # We're being called as a script
+  parse_args $@
+fi
