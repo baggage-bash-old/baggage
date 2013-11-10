@@ -86,11 +86,13 @@ get()
 
 bag()
 {
+  [ -d "bags" ] || mkdir bags
   get "bags" $@
 }
 
 ext()
 {
+  [ -d "ext" ] || mkdir ext
   get "ext" $@
 }
 
