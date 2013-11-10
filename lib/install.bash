@@ -74,13 +74,17 @@ get()
   src="$3"
   dir="$dest/$name"
 
-  echo "Installing $name"
 
-  [ ! -d "$dir" ] && mkdir "$dir"
+  if [ -d "$dir" ]; then
+    echo "Skipping $name - already installed"
+    return
+  fi
+
+  echo "Installing $name"
+  mkdir "$dir"
 
   command=$(map_source_to_command "$src")
 
-  # Just use github for now
   $command "$src" "$dir"
 }
 

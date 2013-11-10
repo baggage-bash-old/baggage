@@ -56,7 +56,7 @@ app_args()
 {
   [ $# -eq 0 ] && usage
 
-  while [ $# -gt 0 ]; do
+  #while [ $# -gt 0 ]; do
     case "$1" in
       "test")     shift; load test; run_tests $@;;
       "new")      shift; load new; new $@;;
@@ -64,8 +64,7 @@ app_args()
       "install")  shift; load install; install $@;;
       "run")      shift; load run; run $@;;
     esac
-    shift
-  done
+  #done
 }
 
 parse_args()

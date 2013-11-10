@@ -28,7 +28,7 @@ close_method()
 create_file()
 {
   local out_file="$1"
-  touch "$out_file"
+  : > "$out_file"
   chmod +x "$out_file"
 }
 
@@ -43,7 +43,7 @@ add_file()
 add_basics()
 {
   local out_file="$1"
-  cat <<-EOF > "$out_file"
+  cat <<-EOF >> "$out_file"
 #!/bin/bash
 # Built $(date)
 set -e
@@ -116,6 +116,8 @@ build_app()
   # Only build an app if we have a bin
   [ -r "bin/$(app_name)" ] || return
 
+  echo " Building app out/$(app_name)"
+
   create_file "$out_file"
   add_basics "$out_file"
   #add_bags "$out_file"
@@ -123,6 +125,7 @@ build_app()
   add_bins "$out_file"
 
   if [ -n "$dest" ]; then
+    echo " Copying to $dest"
     output=$(cp "$out_file" "$dest" 2>&1)
     if [ "$?" -ne "0" ]; then
       if [ "$output" != "${output/Permission denied/}" ]; then
@@ -139,6 +142,8 @@ build_bag()
 {
   local out_file="$(pwd)/out/$(app_name).bag"
   local dest="$1"
+
+  echo " Building bag out/$(app_name).bag"
   create_file "$out_file"
   #add_bags "$out_file"
   add_libs "$out_file"

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Built Sun 10 Nov 2013 07:51:40 GMT
+# Built Sun 10 Nov 2013 18:22:06 GMT
 set -e
 
 export BAGGAGE_APP_BUILT=1
@@ -72,7 +72,7 @@ app_args()
 {
   [ $# -eq 0 ] && usage
 
-  while [ $# -gt 0 ]; do
+  #while [ $# -gt 0 ]; do
     case "$1" in
       "test")     shift; load test; run_tests $@;;
       "new")      shift; load new; new $@;;
@@ -80,8 +80,7 @@ app_args()
       "install")  shift; load install; install $@;;
       "run")      shift; load run; run $@;;
     esac
-    shift
-  done
+  #done
 }
 
 parse_args()
@@ -127,7 +126,7 @@ close_method()
 create_file()
 {
   local out_file="$1"
-  touch "$out_file"
+  : > "$out_file"
   chmod +x "$out_file"
 }
 
@@ -142,7 +141,7 @@ add_file()
 add_basics()
 {
   local out_file="$1"
-  cat <<-EOF > "$out_file"
+  cat <<-EOF >> "$out_file"
 #!/bin/bash
 # Built $(date)
 set -e
@@ -215,6 +214,8 @@ build_app()
   # Only build an app if we have a bin
   [ -r "bin/$(app_name)" ] || return
 
+  echo " Building app out/$(app_name)"
+
   create_file "$out_file"
   add_basics "$out_file"
   #add_bags "$out_file"
@@ -222,6 +223,7 @@ build_app()
   add_bins "$out_file"
 
   if [ -n "$dest" ]; then
+    echo " Copying to $dest"
     output=$(cp "$out_file" "$dest" 2>&1)
     if [ "$?" -ne "0" ]; then
       if [ "$output" != "${output/Permission denied/}" ]; then
@@ -238,6 +240,8 @@ build_bag()
 {
   local out_file="$(pwd)/out/$(app_name).bag"
   local dest="$1"
+
+  echo " Building bag out/$(app_name).bag"
   create_file "$out_file"
   #add_bags "$out_file"
   add_libs "$out_file"
@@ -290,6 +294,29 @@ core()
 ################################################################################
 # lib/core.bash
 ################################################################################
+
+# Provides methods that used by projects
+
+project_name()
+{
+  echo "$BAGGAGE_APP_NAME"
+}
+
+project_path()
+{
+  echo "$BAGGAGE_APP_PATH"
+}
+
+project_version()
+{
+  echo "$BAGGAGE_APP_VERSION"
+}
+
+project_description()
+{
+  echo "$BAGGAGE_APP_DESCRIPTION"
+}
+
 
 built?()
 {
@@ -418,13 +445,17 @@ get()
   src="$3"
   dir="$dest/$name"
 
-  echo "Installing $name"
 
-  [ ! -d "$dir" ] && mkdir "$dir"
+  if [ -d "$dir" ]; then
+    echo "Skipping $name - already installed"
+    return
+  fi
+
+  echo "Installing $name"
+  mkdir "$dir"
 
   command=$(map_source_to_command "$src")
 
-  # Just use github for now
   $command "$src" "$dir"
 }
 

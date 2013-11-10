@@ -1,3 +1,26 @@
+# Provides methods that used by projects
+
+project_name()
+{
+  echo "$BAGGAGE_APP_NAME"
+}
+
+project_path()
+{
+  echo "$BAGGAGE_APP_PATH"
+}
+
+project_version()
+{
+  echo "$BAGGAGE_APP_VERSION"
+}
+
+project_description()
+{
+  echo "$BAGGAGE_APP_DESCRIPTION"
+}
+
+
 built?()
 {
   if [ -n "$BAGGAGE_APP_BUILT" ]; then

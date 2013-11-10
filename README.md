@@ -12,7 +12,7 @@ Installation
 
 Simply run this on your terminal.
 
-    curl http://get.baggage.io | bash
+    curl -L http://get.baggage.io | bash
 
 Creating a project
 ------------------
