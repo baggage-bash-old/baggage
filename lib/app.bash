@@ -45,7 +45,7 @@ global_args()
       -h|--help) usage;;
       --version) version;;
       --debug)   enable_debug; shift; continue;;
-      --trace)   set -x; shift; continue;;
+      --trace)   set -x; set -o functrace; shift; continue;;
       --)        shift; break;;
     esac
     shift

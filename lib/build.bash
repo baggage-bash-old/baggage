@@ -60,7 +60,7 @@ add_libs()
 {
   local out_file="$1"
 
-  [ -d lib ] || return
+  [ -d lib ] || return 0
 
   for file in lib/*.bash; do
     name="$(basename ${file%.bash})"
@@ -92,7 +92,7 @@ add_bags()
 {
   local out_file="$1"
 
-  [ -d bags ] || return
+  [ -d bags ] || return 0
   for dir in bags/*; do
     add_bag "$dir" "$out_file"
   done
@@ -102,7 +102,7 @@ add_bins()
 {
   local out_file="$1"
 
-  [ -d bin ] || return
+  [ -d bin ] || return 0
   for file in bin/*; do
     add_file "$file" "$out_file"
   done
@@ -114,7 +114,7 @@ build_app()
   local dest="$1"
 
   # Only build an app if we have a bin
-  [ -r "bin/$(app_name)" ] || return
+  [ -r "bin/$(app_name)" ] || return 0
 
   echo " Building app out/$(app_name)"
 

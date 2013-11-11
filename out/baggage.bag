@@ -1,292 +1,20 @@
-app()
-{
-
-################################################################################
-# lib/app.bash
-################################################################################
-
-# Global variables
-#export BAGGAGE_APP_NAME=""
-#export BAGGAGE_APP_VERSION=""
-#export BAGGAGE_APP_DESCRIPTION=""
-export BAGGAGE_CONFIG_FILE="Baggage"
-export BAGGAGE_DEBUG=0
-
-app_name()
-{
-  echo "$BAGGAGE_APP_NAME"
-}
-
-app_dir()
-{
-  # TODO - fix this
-  echo "$(dirname $0)"
-}
-
-in_baggage_root?()
-{
-  [ -r "./${BAGGAGE_CONFIG_FILE}" ]
-}
-
-usage()
-{
-  echo "usage"
-}
-
-version()
-{
-  echo "$BAGGAGE_APP_VERSION"
-}
-
-enable_debug()
-{
-  BAGGAGE_DEBUG=1
-}
-
-global_args()
-{
-  [ $# -eq 0 ] && usage
-
-  while [ $# -gt 0 ]; do
-    case "$1" in
-      -h|--help) usage;;
-      --version) version;;
-      --debug)   enable_debug; shift; continue;;
-      --trace)   set -x; shift; continue;;
-      --)        shift; break;;
-    esac
-    shift
-  done
-}
-
-app_args()
-{
-  [ $# -eq 0 ] && usage
-
-  #while [ $# -gt 0 ]; do
-    case "$1" in
-      "test")     shift; load test; run_tests $@;;
-      "new")      shift; load new; new $@;;
-      "build")    shift; load build; build $@;;
-      "install")  shift; load install; install $@;;
-      "run")      shift; load run; run $@;;
-    esac
-  #done
-}
-
-parse_args()
-{
-  global_args $@
-  app_args $@
-}
-} # app
-build()
-{
-
-################################################################################
-# lib/build.bash
-################################################################################
-
-add_header()
-{
-  local header="$1"
-  local out_file="$2"
-
-  echo -e "\n################################################################################" >> "$out_file"
-  echo "# $header" >> "$out_file"
-  echo -e "################################################################################\n" >> "$out_file"
-}
-
-open_method()
-{
-  local name="$1"
-  local out_file="$2"
-
-  echo "${name}()" >> "$out_file"
-  echo "{" >> "$out_file"
-}
-
-close_method()
-{
-  local name="$1"
-  local out_file="$2"
-
-  echo "} # $name" >> "$out_file"
-}
-
-create_file()
-{
-  local out_file="$1"
-  : > "$out_file"
-  chmod +x "$out_file"
-}
-
-add_file()
-{
-  local source_file="$1"
-  local out_file="$2"
-  add_header "$source_file" "$out_file"
-  cat $source_file >> "$out_file"
-}
-
-add_basics()
-{
-  local out_file="$1"
-  cat <<-EOF >> "$out_file"
-#!/bin/bash
-# Built $(date)
-set -e
-
-export BAGGAGE_APP_BUILT=1
-export BAGGAGE_APP_NAME="$BAGGAGE_APP_NAME"
-export BAGGAGE_APP_VERSION="$BAGGAGE_APP_VERSION"
-export BAGGAGE_APP_DESCRIPTION="$BAGGAGE_APP_DESCRIPTION"
-
-EOF
-}
-
-add_libs()
-{
-  local out_file="$1"
-
-  [ -d lib ] || return
-
-  for file in lib/*.bash; do
-    name="$(basename ${file%.bash})"
-    open_method "$name" "$out_file"
-    add_file "$file" "$out_file"
-    close_method "$name" "$out_file"
-  done
-}
-
-add_bag()
-{
-  local bag_dir="$1"
-  local out_file="$2"
-
-  bag_name="$(basename $bag_dir)"
-  file="${bag_dir}/out/${bag_name}.bag"
-
-  if [ ! -r "$file" ]; then
-    pushd "$(dirname $bag_dir)" >/dev/null 2>&1
-    $0 install && $0 build
-    popd
-  fi
-  open_method "$bag_name" "$out_file"
-  add_file "$file" "$out_file"
-  close_method "$bag_name" "$out_file"
-}
-
-add_bags()
-{
-  local out_file="$1"
-
-  [ -d bags ] || return
-  for dir in bags/*; do
-    add_bag "$dir" "$out_file"
-  done
-}
-
-add_bins()
-{
-  local out_file="$1"
-
-  [ -d bin ] || return
-  for file in bin/*; do
-    add_file "$file" "$out_file"
-  done
-}
-
-build_app()
-{
-  local out_file="$(pwd)/out/$(app_name)"
-  local dest="$1"
-
-  # Only build an app if we have a bin
-  [ -r "bin/$(app_name)" ] || return
-
-  echo " Building app out/$(app_name)"
-
-  create_file "$out_file"
-  add_basics "$out_file"
-  #add_bags "$out_file"
-  add_libs "$out_file"
-  add_bins "$out_file"
-
-  if [ -n "$dest" ]; then
-    echo " Copying to $dest"
-    output=$(cp "$out_file" "$dest" 2>&1)
-    if [ "$?" -ne "0" ]; then
-      if [ "$output" != "${output/Permission denied/}" ]; then
-        # Try sudo
-        sudo cp "$out_file" "$dest"
-      else
-        fatal "Could not install $out_file to $dest"
-      fi
-    fi 
-  fi
-}
-
-build_bag()
-{
-  local out_file="$(pwd)/out/$(app_name).bag"
-  local dest="$1"
-
-  echo " Building bag out/$(app_name).bag"
-  create_file "$out_file"
-  #add_bags "$out_file"
-  add_libs "$out_file"
-}
-
-build()
-{
-  source "./$BAGGAGE_CONFIG_FILE"
-  local dest="$1"
-  
-  build_app "$dest"
-  build_bag "$dest"
-}
-} # build
-config()
-{
-
-################################################################################
-# lib/config.bash
-################################################################################
-
-name()
-{
-  BAGGAGE_APP_NAME="$1"
-}
-
-version()
-{
-  BAGGAGE_APP_VERSION="$1"
-}
-
-description()
-{
-  BAGGAGE_APP_DESCRIPTION="$1"
-}
-
-ext()
-{
-  return
-}
-
-bag()
-{
-  return
-}
-} # config
-core()
-{
 
 ################################################################################
 # lib/core.bash
 ################################################################################
 
 # Provides methods that used by projects
+
+except () {
+  local i=0
+  local FRAMES=${#BASH_LINENO[@]}
+  # FRAMES-2 skips main, the last one in arrays
+  for ((i=FRAMES-2; i>=0; i--)); do
+    echo '  File' \"${BASH_SOURCE[i+1]}\", line ${BASH_LINENO[i]}, in ${FUNCNAME[i+1]}
+    # Grab the source code of the line
+    sed -n -e "${BASH_LINENO[i]}{s/^/    /" -e 'p' -e '}' "${BASH_SOURCE[i+1]}"
+  done
+}
 
 project_name()
 {
@@ -352,7 +80,351 @@ load()
     fi
   fi
 }
-} # core
+
+################################################################################
+# app
+################################################################################
+
+app()
+{
+
+################################################################################
+# lib/app.bash
+################################################################################
+
+# Global variables
+#export BAGGAGE_APP_NAME=""
+#export BAGGAGE_APP_VERSION=""
+#export BAGGAGE_APP_DESCRIPTION=""
+export BAGGAGE_CONFIG_FILE="Baggage"
+export BAGGAGE_DEBUG=0
+
+app_name()
+{
+  echo "$BAGGAGE_APP_NAME"
+}
+
+app_dir()
+{
+  # TODO - fix this
+  echo "$(dirname $0)"
+}
+
+in_baggage_root?()
+{
+  [ -r "./${BAGGAGE_CONFIG_FILE}" ]
+}
+
+usage()
+{
+  echo "usage"
+}
+
+version()
+{
+  echo "$BAGGAGE_APP_VERSION"
+}
+
+enable_debug()
+{
+  BAGGAGE_DEBUG=1
+}
+
+global_args()
+{
+  [ $# -eq 0 ] && usage
+
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      -h|--help) usage;;
+      --version) version;;
+      --debug)   enable_debug; shift; continue;;
+      --trace)   set -x; set -o functrace; shift; continue;;
+      --)        shift; break;;
+    esac
+    shift
+  done
+}
+
+app_args()
+{
+  [ $# -eq 0 ] && usage
+
+  #while [ $# -gt 0 ]; do
+    case "$1" in
+      "test")     shift; load test; run_tests $@;;
+      "new")      shift; load new; new $@;;
+      "build")    shift; load build; build $@;;
+      "install")  shift; load install; install $@;;
+      "run")      shift; load run; run $@;;
+    esac
+  #done
+}
+
+parse_args()
+{
+  global_args $@
+  app_args $@
+}
+} # app
+
+################################################################################
+# build
+################################################################################
+
+build()
+{
+
+################################################################################
+# lib/build.bash
+################################################################################
+
+add_header()
+{
+  local header="$1"
+  local out_file="$2"
+
+  echo -e "\n################################################################################" >> "$out_file"
+  echo "# $header" >> "$out_file"
+  echo -e "################################################################################\n" >> "$out_file"
+}
+
+open_method()
+{
+  local name="$1"
+  local out_file="$2"
+
+  echo "${name}()" >> "$out_file"
+  echo "{" >> "$out_file"
+}
+
+close_method()
+{
+  local name="$1"
+  local out_file="$2"
+
+  echo "} # $name" >> "$out_file"
+}
+
+create_file()
+{
+  local out_file="$1"
+  : > "$out_file"
+  chmod +x "$out_file"
+}
+
+add_file()
+{
+  local source_file="$1"
+  local out_file="$2"
+  add_header "$source_file" "$out_file"
+  cat $source_file >> "$out_file"
+}
+
+add_basics()
+{
+  local out_file="$1"
+  cat <<-EOF >> "$out_file"
+#!/bin/bash
+# Built $(date)
+set -e
+
+export BAGGAGE_APP_BUILT=1
+export BAGGAGE_APP_NAME="$BAGGAGE_APP_NAME"
+export BAGGAGE_APP_VERSION="$BAGGAGE_APP_VERSION"
+export BAGGAGE_APP_DESCRIPTION="$BAGGAGE_APP_DESCRIPTION"
+
+EOF
+}
+
+add_core()
+{
+  local out_file="$1"
+  local file="lib/core.bash"
+
+  [ -r "$file" ] || return 0
+  name="$(basename $file)"
+
+  add_file "$file" "$out_file"
+}
+
+add_libs()
+{
+  local out_file="$1"
+
+  [ -d lib ] || return 0
+
+  for file in lib/*.bash; do
+    name="$(basename ${file%.bash})"
+    
+    # Skip core as we handle that separately
+    [ "$name" = "core" ] && continue
+
+    add_header "$name" "$out_file"
+    open_method "$name" "$out_file"
+    add_file "$file" "$out_file"
+    close_method "$name" "$out_file"
+  done
+}
+
+add_bag_file()
+{
+  local file="$1"
+  local out_file="$2"
+
+  bag_name="$(basename $bag_file)"
+  bag_name="${bag_name%.bag}"
+
+  add_header "$bag_name" "$out_file"
+  open_method "$bag_name" "$out_file"
+  add_file "$file" "$out_file"
+  close_method "$bag_name" "$out_file"
+}
+
+add_bag_dir()
+{
+  local bag_dir="$1"
+  local out_file="$2"
+
+  bag_name="$(basename $bag_dir)"
+  file="${bag_dir}/out/${bag_name}.bag"
+
+  if [ ! -r "$file" ]; then
+    pushd "$(dirname $bag_dir)" >/dev/null 2>&1
+    $0 install && $0 build
+    popd
+  fi
+  open_method "$bag_name" "$out_file"
+  add_file "$file" "$out_file"
+  close_method "$bag_name" "$out_file"
+}
+
+add_bag()
+{
+  local bag="$1"
+  local out_file="$2"
+
+  if [ -f $bag ] && [ "${bag:(-4)}" = ".bag" ]; then
+    add_bag_file "$bag" "$out_file"
+  elif [ -d "$bag" ] && [ -r "${bag}/Baggage" ]; then
+    add_bag_dir "$bag" "$out_file"
+  fi
+}
+
+add_bags()
+{
+  local out_file="$1"
+
+  [ -d bags ] || return 0
+  for bag in bags/*; do
+    add_bag "$bag" "$out_file"
+  done
+}
+
+add_bins()
+{
+  local out_file="$1"
+
+  [ -d bin ] || return 0
+  for file in bin/*; do
+    add_file "$file" "$out_file"
+  done
+}
+
+build_app()
+{
+  local out_file="$(pwd)/out/$(app_name)"
+  local dest="$1"
+
+  # Only build an app if we have a bin
+  [ -r "bin/$(app_name)" ] || return 0
+
+  echo " Building app out/$(app_name)"
+
+  create_file "$out_file"
+  add_basics "$out_file"
+  add_core "$out_file"
+  add_bags "$out_file"
+  add_libs "$out_file"
+  add_bins "$out_file"
+
+  if [ -n "$dest" ]; then
+    echo " Copying to $dest"
+    output=$(cp "$out_file" "$dest" 2>&1)
+    if [ "$?" -ne "0" ]; then
+      if [ "$output" != "${output/Permission denied/}" ]; then
+        # Try sudo
+        sudo cp "$out_file" "$dest"
+      else
+        fatal "Could not install $out_file to $dest"
+      fi
+    fi 
+  fi
+}
+
+build_bag()
+{
+  local out_file="$(pwd)/out/$(app_name).bag"
+  local dest="$1"
+
+  echo " Building bag out/$(app_name).bag"
+  create_file "$out_file"
+  add_core "$out_file"
+  add_bags "$out_file"
+  add_libs "$out_file"
+}
+
+build()
+{
+  source "./$BAGGAGE_CONFIG_FILE"
+  local dest="$1"
+  
+  build_app "$dest"
+  build_bag "$dest"
+}
+} # build
+
+################################################################################
+# config
+################################################################################
+
+config()
+{
+
+################################################################################
+# lib/config.bash
+################################################################################
+
+name()
+{
+  BAGGAGE_APP_NAME="$1"
+}
+
+version()
+{
+  BAGGAGE_APP_VERSION="$1"
+}
+
+description()
+{
+  BAGGAGE_APP_DESCRIPTION="$1"
+}
+
+ext()
+{
+  return
+}
+
+bag()
+{
+  return
+}
+} # config
+
+################################################################################
+# install
+################################################################################
+
 install()
 {
 
@@ -467,6 +539,11 @@ install()
   source "./$BAGGAGE_CONFIG_FILE"
 }
 } # install
+
+################################################################################
+# new
+################################################################################
+
 new()
 {
 
@@ -595,6 +672,11 @@ new()
   create_example_bin "$name" "$new_app_path"
 }
 } # new
+
+################################################################################
+# run
+################################################################################
+
 run()
 {
 
@@ -615,6 +697,11 @@ run()
   fi
 }
 } # run
+
+################################################################################
+# test
+################################################################################
+
 test()
 {
 

@@ -1,12 +1,8 @@
 #!/bin/bash
 set -e
 
-# Need to bootstrap the bootstrap
-if [ -z "$BAGGAGE_APP_BUILT" ]; then
-  source lib/core.bash
-else
-  core
-fi
+# Bootstrap if not built
+[ -z "$BAGGAGE_APP_BUILT" ] && source "lib/core.bash"
 
 load app
 load config
