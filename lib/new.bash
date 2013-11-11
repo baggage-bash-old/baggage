@@ -61,6 +61,78 @@ create_example_test()
 EOF
 }
 
+create_core_lib()
+{
+  local path="$1"
+  local core_file="${path}/lib/core.bash"
+  cat <<-'EOF' > "$core_file"
+# Provides methods that used by projects
+
+except() {
+  local i=0
+  local FRAMES=${#BASH_LINENO[@]}
+  # FRAMES-2 skips main, the last one in arrays
+  for ((i=FRAMES-2; i>=0; i--)); do
+    echo '  File' \"${BASH_SOURCE[i+1]}\", line ${BASH_LINENO[i]}, in ${FUNCNAME[i+1]}
+    # Grab the source code of the line
+    sed -n -e "${BASH_LINENO[i]}{s/^/    /" -e 'p' -e '}' "${BASH_SOURCE[i+1]}"
+  done
+}
+
+project_name()
+{
+  echo "$BAGGAGE_APP_NAME"
+}
+
+project_path()
+{
+  echo "$BAGGAGE_APP_PATH"
+}
+
+project_version()
+{
+  echo "$BAGGAGE_APP_VERSION"
+}
+
+project_description()
+{
+  echo "$BAGGAGE_APP_DESCRIPTION"
+}
+
+
+built?()
+{
+  if [ -n "$BAGGAGE_APP_BUILT" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+
+fatal()
+{
+  echo "FATAL - $1"
+  except
+  exit 1
+}
+
+load()
+{
+  local name="$1"
+  [ -z "$name" ] && error "load argument missing"
+
+  if built?; then
+    $name
+  else
+    if [ -r "lib/${name}.bash" ]; then
+      source "lib/${name}.bash"
+    fi
+  fi
+}
+EOF
+}
+
 create_example_lib()
 {
   local path="$1"
@@ -84,10 +156,7 @@ create_example_bin()
 #!/bin/bash
 set -e
 
-# TODO - provide basic stuff
-# load example
-source lib/example.bash
-
+load example
 total=0
 while [ \$# -gt 0 ]; do
   total=\$(add_two_numbers "\$total" "\$1")  
@@ -97,6 +166,13 @@ echo "Total: \$total"
 EOF
 
   chmod +x "$bin_file"
+}
+
+thisisdumb()
+{
+  [ -r "$BAGGAGE_CONFIG_FILE" ] || fatal "Must be in baggage root dir"
+  echo "Creating core lib"
+  create_core_lib "./"
 }
 
 new()
@@ -115,6 +191,7 @@ new()
   create_sub_dirs "$new_app_path"
   create_baggage_file "$name" "$new_app_path"
   create_example_test "$new_app_path"
+  create_core_lib "$new_app_path"
   create_example_lib "$new_app_path"
   create_example_bin "$name" "$new_app_path"
 }

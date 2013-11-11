@@ -1,6 +1,6 @@
 # Provides methods that used by projects
 
-except () {
+except() {
   local i=0
   local FRAMES=${#BASH_LINENO[@]}
   # FRAMES-2 skips main, the last one in arrays
@@ -41,24 +41,11 @@ built?()
   fi
 }
 
-info()
-{
-  echo "INFO - $1"
-}
-
-warn()
-{
-  echo "WARN - $1"
-}
-
-error()
-{
-  echo "ERROR - $1"
-}
 
 fatal()
 {
   echo "FATAL - $1"
+  except
   exit 1
 }
 

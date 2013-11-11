@@ -56,6 +56,17 @@ export BAGGAGE_APP_DESCRIPTION="$BAGGAGE_APP_DESCRIPTION"
 EOF
 }
 
+add_core()
+{
+  local out_file="$1"
+  local file="lib/core.bash"
+
+  [ -r "$file" ] || return 0
+  name="$(basename $file)"
+
+  add_file "$file" "$out_file"
+}
+
 add_libs()
 {
   local out_file="$1"
@@ -64,6 +75,10 @@ add_libs()
 
   for file in lib/*.bash; do
     name="$(basename ${file%.bash})"
+
+    # Skip core as we handle it elsewhere
+    [ "$name" = "core" ] && continue    
+
     open_method "$name" "$out_file"
     add_file "$file" "$out_file"
     close_method "$name" "$out_file"
@@ -120,6 +135,7 @@ build_app()
 
   create_file "$out_file"
   add_basics "$out_file"
+  add_core "$out_file"
   #add_bags "$out_file"
   add_libs "$out_file"
   add_bins "$out_file"

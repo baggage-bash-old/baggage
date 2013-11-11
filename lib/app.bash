@@ -63,6 +63,7 @@ app_args()
       "build")    shift; load build; build $@;;
       "install")  shift; load install; install $@;;
       "run")      shift; load run; run $@;;
+      "thisisdumb") shift; load new; thisisdumb $@;;
     esac
   #done
 }
