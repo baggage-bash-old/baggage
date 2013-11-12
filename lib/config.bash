@@ -13,6 +13,11 @@ description()
   BAGGAGE_APP_DESCRIPTION="$1"
 }
 
+bootstrap()
+{
+  BAGGAGE_BOOTSTRAP="$1"
+}
+
 ext()
 {
   return

@@ -156,13 +156,16 @@ build_app()
 
 build_bag()
 {
-  local out_file="$(pwd)/out/$(app_name).bag"
   local dest="$1"
+  local bag_name="$(app_name)"
+  local out_file="$(pwd)/out/$bag_name.bag"
 
-  echo " Building bag out/$(app_name).bag"
+  echo " Building bag out/$bag_name.bag"
   create_file "$out_file"
+  open_method "$bag_name" "$out_file"
   #add_bags "$out_file"
   add_libs "$out_file"
+  close_method "$bag_name" "$out_file"
 }
 
 build()

@@ -1,3 +1,5 @@
+baggage()
+{
 app()
 {
 
@@ -246,13 +248,16 @@ build_app()
 
 build_bag()
 {
-  local out_file="$(pwd)/out/$(app_name).bag"
   local dest="$1"
+  local bag_name="$(app_name)"
+  local out_file="$(pwd)/out/$bag_name.bag"
 
-  echo " Building bag out/$(app_name).bag"
+  echo " Building bag out/$bag_name.bag"
   create_file "$out_file"
+  open_method "$bag_name" "$out_file"
   #add_bags "$out_file"
   add_libs "$out_file"
+  close_method "$bag_name" "$out_file"
 }
 
 build()
@@ -284,6 +289,11 @@ version()
 description()
 {
   BAGGAGE_APP_DESCRIPTION="$1"
+}
+
+bootstrap()
+{
+  BAGGAGE_BOOTSTRAP="$1"
 }
 
 ext()
@@ -622,16 +632,21 @@ run()
 # lib/run.bash
 ################################################################################
 
-load config
-
 run()
 {
+  load config
+  
   source "./$BAGGAGE_CONFIG_FILE"
+  
+  # We're about to run the command, so pretend
+  # we haven't been built
+  built_flag_off
 
   command="bin/$(app_name)"
 
   if [ -r "$command" ]; then
-    exec "$command" $@
+    #exec "$command" $@
+    source "$command"
   fi
 }
 } # run
@@ -654,3 +669,4 @@ run_tests()
   fi
 }
 } # test
+} # baggage

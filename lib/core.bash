@@ -41,6 +41,10 @@ built?()
   fi
 }
 
+built_flag_off()
+{
+  export BAGGAGE_APP_BUILT=""
+}
 
 fatal()
 {
@@ -59,6 +63,10 @@ load()
   else
     if [ -r "lib/${name}.bash" ]; then
       source "lib/${name}.bash"
+    elif [ -r "bags/${name}.bag" ]; then
+      source "bags/${name}.bag"
+    elif [ -d "bags/${name}" ] && [ -r "bags/${name}/out/${name}.bag" ]; then
+      source "bags/${name}/out/${name}.bag"
     fi
   fi
 }
