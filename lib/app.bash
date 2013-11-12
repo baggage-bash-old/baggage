@@ -1,7 +1,3 @@
-# Global variables
-#export BAGGAGE_APP_NAME=""
-#export BAGGAGE_APP_VERSION=""
-#export BAGGAGE_APP_DESCRIPTION=""
 export BAGGAGE_CONFIG_FILE="Baggage"
 export BAGGAGE_DEBUG=0
 

@@ -45,7 +45,7 @@ add_basics()
   local out_file="$1"
   cat <<-EOF >> "$out_file"
 #!/bin/bash
-# Built $(date)
+# Built using http://baggage.io at $(date)
 set -e
 
 export BAGGAGE_APP_BUILT=1
@@ -67,21 +67,28 @@ add_core()
   add_file "$file" "$out_file"
 }
 
+add_lib()
+{
+  local lib_file="$1"
+  local out_file="$2"
+  local name="$(basename ${file%.bash})"
+
+  add_header "$name" "$out_file"
+  open_method "$name" "$out_file"
+  add_file "$file" "$out_file"
+  close_method "$name" "$out_file"
+}
+
 add_libs()
 {
   local out_file="$1"
 
   [ -d lib ] || return 0
 
-  for file in lib/*.bash; do
-    name="$(basename ${file%.bash})"
-
+  for file in $(ls lib/*.bash 2>/dev/null); do
     # Skip core as we handle it elsewhere
-    [ "$name" = "core" ] && continue    
-
-    open_method "$name" "$out_file"
-    add_file "$file" "$out_file"
-    close_method "$name" "$out_file"
+    [ "$file" = "lib/core.bash" ] && continue    
+    add_lib "$file" "$out_file"
   done
 }
 
@@ -90,14 +97,16 @@ add_bag()
   local bag_dir="$1"
   local out_file="$2"
 
-  bag_name="$(basename $bag_dir)"
-  file="${bag_dir}/out/${bag_name}.bag"
+  local bag_name="$(basename $bag_dir)"
+  local file="${bag_dir}/out/${bag_name}.bag"
 
   if [ ! -r "$file" ]; then
     pushd "$(dirname $bag_dir)" >/dev/null 2>&1
     $0 install && $0 build
     popd
   fi
+
+  add_header "$name" "$out_file"
   open_method "$bag_name" "$out_file"
   add_file "$file" "$out_file"
   close_method "$bag_name" "$out_file"
@@ -108,7 +117,7 @@ add_bags()
   local out_file="$1"
 
   [ -d bags ] || return 0
-  for dir in bags/*; do
+  for dir in $(ls bags/* 2>/dev/null); do
     add_bag "$dir" "$out_file"
   done
 }
@@ -118,7 +127,7 @@ add_bins()
   local out_file="$1"
 
   [ -d bin ] || return 0
-  for file in bin/*; do
+  for file in $(ls bin/* 2>/dev/null); do
     add_file "$file" "$out_file"
   done
 }
@@ -136,7 +145,7 @@ build_app()
   create_file "$out_file"
   add_basics "$out_file"
   add_core "$out_file"
-  #add_bags "$out_file"
+  add_bags "$out_file"
   add_libs "$out_file"
   add_bins "$out_file"
 
@@ -163,7 +172,7 @@ build_bag()
   echo " Building bag out/$bag_name.bag"
   create_file "$out_file"
   open_method "$bag_name" "$out_file"
-  #add_bags "$out_file"
+  add_bags "$out_file"
   add_libs "$out_file"
   close_method "$bag_name" "$out_file"
 }
