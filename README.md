@@ -36,12 +36,6 @@ The process for building application and bag projects is the same. In fact, the 
 
 A new project comes with some sample files, as used here [baggage.io](http://baggage.io). 
 
-In brief, it creates:
-
- * Baggage file - Contains metadata and specified dependencies
- * bags directory - Bags we depend on are installed here
- * bin directory - 
-
 The Baggage file
 ----------------
 
@@ -56,19 +50,29 @@ Here is an example file
     # We really want this ext so we can use it to test
     # bags as we install them. Remove it at your peril.
     
-    bag core https://github.com/zeroXten/baggage-core.git
     ext bats https://github.com/sstephenson/bats.git
     
     # Add your bags here
 
+    bag mylib https://github.com/youruser/mylib.git
+
 The meaning of the attributes is quite obvious, but you are not allowed spaces in the name.
 
-We can also see two other interesting things, namely the "bag" and "ext" methods. The bag method states that we require the specified bag (a Baggage library) and the ext method states that we require an external library or script.
+We can also see two other interesting things, namely the "bag" and "ext" functions. The bag function states that we require the specified bag (a Baggage library) and the ext function states that we require an external library or script.
+
+The plan is to support versioning at some point.
 
 Bags
 ----
 
-Bags are 
+Bags are basically baggage project libraries that can be shared and reused between projects.
 
 External scripts
 ----------------
+
+External scripts can be used in projects, but will not be added to the standalone built script.
+
+More
+----
+
+More documentation to follow shortly.
