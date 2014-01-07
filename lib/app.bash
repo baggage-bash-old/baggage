@@ -55,6 +55,8 @@ app_args()
   #while [ $# -gt 0 ]; do
     case "$1" in
       "test")     shift; require test; run_tests $@;;
+      "spec")     shift; require spec; run_spec $@;;
+      "spec_test") shift; require spec; run_spec_tests $@;;
       "new")      shift; require new; new $@;;
       "build")    shift; require build; build $@;;
       "install")  shift; require install; install $@;;

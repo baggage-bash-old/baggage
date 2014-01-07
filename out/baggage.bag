@@ -69,6 +69,8 @@ app_args()
   #while [ $# -gt 0 ]; do
     case "$1" in
       "test")     shift; require test; run_tests $@;;
+      "spec")     shift; require spec; run_spec $@;;
+      "spec_test") shift; require spec; run_spec_tests $@;;
       "new")      shift; require new; new $@;;
       "build")    shift; require build; build $@;;
       "install")  shift; require install; install $@;;
@@ -700,6 +702,43 @@ run()
   fi
 }
 } # run
+
+################################################################################
+# spec
+################################################################################
+
+spec()
+{
+
+################################################################################
+# lib/spec.bash
+################################################################################
+
+run_spec()
+{
+  dir=$(find_root_path)
+  if [ -r "${dir}/${VAGRANT_FILE}" ]; then
+    which -s vagrant
+    if [ "$?" -eq "0" ]; then
+      vagrant up
+    else
+      fatal "Vagrant doesn't seem to be installed"
+    fi
+  fi
+}
+
+run_spec_tests()
+{
+  #in_baggage_root?
+  dir=$(find_root_path)
+
+  # Run bats tests
+  bats_file="${dir}/ext/bats/bin/bats"
+  if [ -x "$bats_file" ]; then
+    $bats_file spec/*.bats
+  fi
+}
+} # spec
 
 ################################################################################
 # test
