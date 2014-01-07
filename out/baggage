@@ -1,5 +1,5 @@
 #!/bin/bash
-# Built using http://baggage.io at Tue  7 Jan 2014 16:26:54 GMT
+# Built using http://baggage.io at Tue  7 Jan 2014 16:28:11 GMT
 set -e
 
 export BAGGAGE_APP_BUILT=1
@@ -822,7 +822,7 @@ run_spec()
     if [ "$?" -eq "0" ]; then
       vagrant up
       if [ "$?" -eq "0" ]; then
-        vagrant destroy
+        vagrant destroy -f
       else
         fatal "Problem running tests. Use vagrant ssh to investigate"
       fi

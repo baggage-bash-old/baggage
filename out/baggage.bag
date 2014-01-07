@@ -722,7 +722,7 @@ run_spec()
     if [ "$?" -eq "0" ]; then
       vagrant up
       if [ "$?" -eq "0" ]; then
-        vagrant destroy
+        vagrant destroy -f
       else
         fatal "Problem running tests. Use vagrant ssh to investigate"
       fi
