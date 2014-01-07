@@ -5,6 +5,11 @@ run_spec()
     which -s vagrant
     if [ "$?" -eq "0" ]; then
       vagrant up
+      if [ "$?" -eq "0" ]; then
+        vagrant destroy
+      else
+        fatal "Problem running tests. Use vagrant ssh to investigate"
+      fi
     else
       fatal "Vagrant doesn't seem to be installed"
     fi
