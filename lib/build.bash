@@ -122,45 +122,46 @@ add_bags()
   done
 }
 
-add_bins()
+add_bin()
 {
-  local out_file="$1"
+  local bin_file="$1"
+  local out_file="$2"
 
-  [ -d bin ] || return 0
-  for file in $(ls bin/* 2>/dev/null); do
-    add_file "$file" "$out_file"
-  done
+  add_file "$bin_file" "$out_file"
 }
 
 build_app()
 {
-  local out_file="$(pwd)/out/$(app_name)"
   local dest="$1"
 
-  # Only build an app if we have a bin
-  [ -r "bin/$(app_name)" ] || return 0
+  [ -d bin ] || return 0
+  for bin_file in $(ls bin/* 2>/dev/null); do
+    bin_name="$(basename $bin_file)"
 
-  echo " Building app out/$(app_name)"
+    local out_file="$(pwd)/out/${bin_name}"
+    echo " Building app out/${bin_name}"
 
-  create_file "$out_file"
-  add_basics "$out_file"
-  add_core "$out_file"
-  add_bags "$out_file"
-  add_libs "$out_file"
-  add_bins "$out_file"
+    create_file "$out_file"
+    add_basics "$out_file"
+    add_core "$out_file"
+    add_bags "$out_file"
+    add_libs "$out_file"
+    add_bin "$bin_file" "$out_file"
 
-  if [ -n "$dest" ]; then
-    echo " Copying to $dest"
-    output=$(cp "$out_file" "$dest" 2>&1)
-    if [ "$?" -ne "0" ]; then
-      if [ "$output" != "${output/Permission denied/}" ]; then
-        # Try sudo
-        sudo cp "$out_file" "$dest"
-      else
-        fatal "Could not install $out_file to $dest"
-      fi
-    fi 
-  fi
+    if [ -n "$dest" ]; then
+      echo " Copying to $dest"
+      output=$(cp "$out_file" "$dest" 2>&1)
+      if [ "$?" -ne "0" ]; then
+        if [ "$output" != "${output/Permission denied/}" ]; then
+          # Try sudo
+          sudo cp "$out_file" "$dest"
+        else
+          fatal "Could not install $out_file to $dest"
+        fi
+      fi 
+    fi
+
+  done
 }
 
 build_bag()

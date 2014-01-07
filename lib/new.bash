@@ -117,16 +117,21 @@ fatal()
   exit 1
 }
 
-load()
+require()
 {
   local name="$1"
-  [ -z "$name" ] && error "load argument missing"
+  [ -z "$name" ] && error "require argument missing"
 
   if built?; then
     $name
   else
-    if [ -r "lib/${name}.bash" ]; then
-      source "lib/${name}.bash"
+    dir=$(find_root_path)
+    if [ -r "${dir}/lib/${name}.bash" ]; then
+      source "${dir}/lib/${name}.bash"
+    elif [ -r "${dir}/bags/${name}.bag" ]; then
+      source "${dir}/bags/${name}.bag"
+    elif [ -d "${dir}/bags/${name}" ] && [ -r "${dir}/bags/${name}/out/${name}.bag" ]; then
+      source "${dir}/bags/${name}/out/${name}.bag"
     fi
   fi
 }
@@ -156,7 +161,7 @@ create_example_bin()
 #!/bin/bash
 set -e
 
-load example
+require example
 total=0
 while [ \$# -gt 0 ]; do
   total=\$(add_two_numbers "\$total" "\$1")  

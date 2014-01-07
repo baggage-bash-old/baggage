@@ -68,12 +68,12 @@ app_args()
 
   #while [ $# -gt 0 ]; do
     case "$1" in
-      "test")     shift; load test; run_tests $@;;
-      "new")      shift; load new; new $@;;
-      "build")    shift; load build; build $@;;
-      "install")  shift; load install; install $@;;
-      "run")      shift; load run; run $@;;
-      "thisisdumb") shift; load new; thisisdumb $@;;
+      "test")     shift; require test; run_tests $@;;
+      "new")      shift; require new; new $@;;
+      "build")    shift; require build; build $@;;
+      "install")  shift; require install; install $@;;
+      "run")      shift; require run; run $@;;
+      "thisisdumb") shift; require new; thisisdumb $@;;
     esac
   #done
 }
@@ -220,45 +220,46 @@ add_bags()
   done
 }
 
-add_bins()
+add_bin()
 {
-  local out_file="$1"
+  local bin_file="$1"
+  local out_file="$2"
 
-  [ -d bin ] || return 0
-  for file in $(ls bin/* 2>/dev/null); do
-    add_file "$file" "$out_file"
-  done
+  add_file "$bin_file" "$out_file"
 }
 
 build_app()
 {
-  local out_file="$(pwd)/out/$(app_name)"
   local dest="$1"
 
-  # Only build an app if we have a bin
-  [ -r "bin/$(app_name)" ] || return 0
+  [ -d bin ] || return 0
+  for bin_file in $(ls bin/* 2>/dev/null); do
+    bin_name="$(basename $bin_file)"
 
-  echo " Building app out/$(app_name)"
+    local out_file="$(pwd)/out/${bin_name}"
+    echo " Building app out/${bin_name}"
 
-  create_file "$out_file"
-  add_basics "$out_file"
-  add_core "$out_file"
-  add_bags "$out_file"
-  add_libs "$out_file"
-  add_bins "$out_file"
+    create_file "$out_file"
+    add_basics "$out_file"
+    add_core "$out_file"
+    add_bags "$out_file"
+    add_libs "$out_file"
+    add_bin "$bin_file" "$out_file"
 
-  if [ -n "$dest" ]; then
-    echo " Copying to $dest"
-    output=$(cp "$out_file" "$dest" 2>&1)
-    if [ "$?" -ne "0" ]; then
-      if [ "$output" != "${output/Permission denied/}" ]; then
-        # Try sudo
-        sudo cp "$out_file" "$dest"
-      else
-        fatal "Could not install $out_file to $dest"
-      fi
-    fi 
-  fi
+    if [ -n "$dest" ]; then
+      echo " Copying to $dest"
+      output=$(cp "$out_file" "$dest" 2>&1)
+      if [ "$?" -ne "0" ]; then
+        if [ "$output" != "${output/Permission denied/}" ]; then
+          # Try sudo
+          sudo cp "$out_file" "$dest"
+        else
+          fatal "Could not install $out_file to $dest"
+        fi
+      fi 
+    fi
+
+  done
 }
 
 build_bag()
@@ -338,7 +339,7 @@ install()
 # lib/install.bash
 ################################################################################
 
-load config
+require config
 
 map_source_to_command()
 {
@@ -576,16 +577,21 @@ fatal()
   exit 1
 }
 
-load()
+require()
 {
   local name="$1"
-  [ -z "$name" ] && error "load argument missing"
+  [ -z "$name" ] && error "require argument missing"
 
   if built?; then
     $name
   else
-    if [ -r "lib/${name}.bash" ]; then
-      source "lib/${name}.bash"
+    dir=$(find_root_path)
+    if [ -r "${dir}/lib/${name}.bash" ]; then
+      source "${dir}/lib/${name}.bash"
+    elif [ -r "${dir}/bags/${name}.bag" ]; then
+      source "${dir}/bags/${name}.bag"
+    elif [ -d "${dir}/bags/${name}" ] && [ -r "${dir}/bags/${name}/out/${name}.bag" ]; then
+      source "${dir}/bags/${name}/out/${name}.bag"
     fi
   fi
 }
@@ -615,7 +621,7 @@ create_example_bin()
 #!/bin/bash
 set -e
 
-load example
+require example
 total=0
 while [ \$# -gt 0 ]; do
   total=\$(add_two_numbers "\$total" "\$1")  
@@ -669,19 +675,28 @@ run()
 
 run()
 {
-  load config
-  
-  source "./$BAGGAGE_CONFIG_FILE"
-  
+  command_name="$1"
+
+  require config
+  dir=$(find_root_path)
+
+  source "${dir}/${BAGGAGE_CONFIG_FILE}"
+
   # We're about to run the command, so pretend
   # we haven't been built
   built_flag_off
 
-  command="bin/$(app_name)"
+  if [ -n "$command_name" ] && [ -r "bin/${command_name}" ]; then
+    command_file="${dir}/bin/${command_name}"
+    shift
+  else
+    command_file="${dir}/bin/$(app_name)"
+  fi
 
-  if [ -r "$command" ]; then
-    #exec "$command" $@
-    source "$command"
+  if [ -r "$command_file" ]; then
+    source "$command_file"
+  else
+    fatal "Cannot find $command_file"
   fi
 }
 } # run

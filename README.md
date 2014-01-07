@@ -1,7 +1,7 @@
 Baggage
 -------
 
-Baggage is a gem/bundler/rake/rails-like system for Bash.
+Baggage is a gem/bundler/rake/rails-like packager for Bash.
 
 For a really quick overview go to [baggage.io](http://baggage.io).
 
@@ -12,7 +12,9 @@ Installation
 
 Simply run this on your terminal.
 
-    curl -L http://get.baggage.io | bash
+    $ curl -L http://get.baggage.io > baggage
+    $ chmod +x baggage
+    $ sudo mv baggage /usr/bin/
 
 Creating a project
 ------------------
@@ -39,7 +41,7 @@ A new project comes with some sample files, as used here [baggage.io](http://bag
 The Baggage file
 ----------------
 
-All Baggage projects need a Baggage file the their root directory. This file contains metadata about the project and specifies libraries that it depends on.
+All Baggage projects need a Baggage file in their root directory. This file contains metadata about the project and specifies libraries that it depends on.
 
 Here is an example file
 
@@ -56,7 +58,7 @@ Here is an example file
 
     bag mylib https://github.com/youruser/mylib.git
 
-The meaning of the attributes is quite obvious, but you are not allowed spaces in the name.
+The meaning of the attributes is quite obvious. Not that you are not allowed spaces in the name.
 
 We can also see two other interesting things, namely the "bag" and "ext" functions. The bag function states that we require the specified bag (a Baggage library) and the ext function states that we require an external library or script.
 
@@ -65,7 +67,7 @@ The plan is to support versioning at some point.
 Bags
 ----
 
-Bags are basically baggage project libraries that can be shared and reused between projects.
+Bags are basically baggage project libraries that can be shared and reused between projects. 
 
 External scripts
 ----------------

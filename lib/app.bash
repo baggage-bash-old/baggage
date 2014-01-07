@@ -54,12 +54,12 @@ app_args()
 
   #while [ $# -gt 0 ]; do
     case "$1" in
-      "test")     shift; load test; run_tests $@;;
-      "new")      shift; load new; new $@;;
-      "build")    shift; load build; build $@;;
-      "install")  shift; load install; install $@;;
-      "run")      shift; load run; run $@;;
-      "thisisdumb") shift; load new; thisisdumb $@;;
+      "test")     shift; require test; run_tests $@;;
+      "new")      shift; require new; new $@;;
+      "build")    shift; require build; build $@;;
+      "install")  shift; require install; install $@;;
+      "run")      shift; require run; run $@;;
+      "thisisdumb") shift; require new; thisisdumb $@;;
     esac
   #done
 }

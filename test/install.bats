@@ -1,5 +1,6 @@
 #!/usr/bin/env bats
 
+load ../lib/core
 load ../lib/install
 
 @test "command for git" {

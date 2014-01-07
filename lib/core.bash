@@ -53,20 +53,36 @@ fatal()
   exit 1
 }
 
-load()
+find_root_path()
+{
+  cwd=${1:-$(pwd)}
+
+  if [ "$cwd" == "/" ]; then
+    fatal "Could not find Baggage file. Are you in a baggage directory?"
+  fi
+
+  if [ -e "${cwd}/${BAGGAGE_CONFIG_FILE}" ]; then
+    echo $cwd
+  else 
+    find_root_path $(dirname "$cwd")
+  fi
+}
+
+require()
 {
   local name="$1"
-  [ -z "$name" ] && error "load argument missing"
+  [ -z "$name" ] && error "require argument missing"
 
   if built?; then
     $name
   else
-    if [ -r "lib/${name}.bash" ]; then
-      source "lib/${name}.bash"
-    elif [ -r "bags/${name}.bag" ]; then
-      source "bags/${name}.bag"
-    elif [ -d "bags/${name}" ] && [ -r "bags/${name}/out/${name}.bag" ]; then
-      source "bags/${name}/out/${name}.bag"
+    dir=$(find_root_path)
+    if [ -r "${dir}/lib/${name}.bash" ]; then
+      source "${dir}/lib/${name}.bash"
+    elif [ -r "${dir}/bags/${name}.bag" ]; then
+      source "${dir}/bags/${name}.bag"
+    elif [ -d "${dir}/bags/${name}" ] && [ -r "${dir}/bags/${name}/out/${name}.bag" ]; then
+      source "${dir}/bags/${name}/out/${name}.bag"
     fi
   fi
 }

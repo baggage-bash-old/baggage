@@ -1,4 +1,4 @@
-load config
+require config
 
 map_source_to_command()
 {
